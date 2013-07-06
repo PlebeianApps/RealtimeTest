@@ -4,3 +4,4 @@ build/*
 tmp
 ._*
 .DS_Store
+.settings/*
