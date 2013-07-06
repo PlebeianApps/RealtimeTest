@@ -78,7 +78,19 @@ function presenceDisable()
 	*/
 }
 
-presenceEnable();
+//presenceEnable();
+
+var unsubscribe = function()
+{
+	setTimeout(function(){ortc.send(taChannel.value, '----User Unsubscribed to Channel')}, 500);
+	setTimeout(function(){ortc.unsubscribe(taChannel.value)}, 1500);
+}
+
+function subscribe()
+{
+	ortc.subscribe(taChannel.value, true);
+	ortc.send(taChannel.value, '----User Subscribed to Channel');
+}
 
 ortc.addEventListener('onException', function(e) {	
 	addRowToEvents('Exception: '+e.info);
@@ -162,11 +174,12 @@ btConnect.addEventListener('click', function(e) {
 		} else {
 			ortc.connect(taAppKey.value);
 		}
-		btPresence.enabled = true;
+		//btPresence.enabled = true;
 	} else {
-		setTimeout(function(){presenceDisable();}, 500);
-		setTimeout(function(){ortc.disconnect();}, 1500);
-		btPresence.enabled = false;
+		ortc.disconnect();
+		//setTimeout(function(){presenceDisable();}, 500);
+		//setTimeout(function(){ortc.disconnect();}, 1500);
+		//btPresence.enabled = false;
 	}
 });
 win.add(btConnect);
@@ -249,8 +262,7 @@ var btSubscribe = Titanium.UI.createButton({
 	height: '8%'
 });
 btSubscribe.addEventListener('click', function(e) {
-	ortc.subscribe(taChannel.value, true);
-	ortc.send(taChannel.value, '----User Subscribed to Channel');
+	subscribe();
 });
 win.add(btSubscribe);
 
@@ -262,9 +274,7 @@ var btUnsubscribe = Titanium.UI.createButton({
 	height: '8%'
 });
 btUnsubscribe.addEventListener('click', function(e) {
-	//ortc.unsubscribe(taChannel.value);
-	setTimeout(function(){ortc.send(taChannel.value, '----User Unsubscribed to Channel')}, 500);
-	setTimeout(function(){ortc.unsubscribe(taChannel.value)}, 1500);
+	unsubscribe();
 });
 win.add(btUnsubscribe);
 
@@ -279,7 +289,89 @@ var btPresence = Titanium.UI.createButton({
 btPresence.addEventListener('click', function(e) {
 	ortc.presence(taChannel.value);
 });
-win.add(btPresence);
+//win.add(btPresence);
+
+// Timer Stuff Begins Here 
+//create countdown
+var min = Ti.UI.createLabel({
+	color: 'black',
+	text: '{i}:',
+	top: '33%',
+	left: '3%',
+	font:{fontSize:20,fontFamily:'Helvetica Neue'},
+	width:'auto',
+});
+win.add(min);
+
+	//seconds label
+var sec = Ti.UI.createLabel({
+	color: 'black',
+	text: '{s}',
+	top: '33%',
+	left: '12%',
+	font:{fontSize:20,fontFamily:'Helvetica Neue'},
+	width: 'auto'	
+	});
+win.add(sec);
+
+var countdown = require('countdown');
+var cd;
+	
+cd = new countdown({
+	//provide time
+	//here for example 10 minutes, and 1 sec
+	//min: 10,
+	min: 1,
+	sec: 1,
+	//provide labels for outputing
+	//each specific time unit
+	label_min: min,//minutes
+	label_sec: sec,//seconds
+	//on end event callback
+	onend: unsubscribe,
+});
+
+var startBtn = Ti.UI.createButton({
+	height: '8%',
+    width:'23%',
+    title: 'Start',
+  	top: '33%',
+  	left: '25%'
+});
+startBtn.addEventListener('click', function(e){
+	cd.start();
+	subscribe();
+});
+win.add(startBtn);
+
+var stopBtn = Ti.UI.createButton({
+	height: '8%',
+    width:'23%',
+    title: 'Stop',
+  	top: '33%',
+  	left: '50%'
+});
+stopBtn.addEventListener('click', function(e) {
+	cd.stop();
+	unsubscribe();
+});
+win.add(stopBtn);
+
+var resetBtn = Ti.UI.createButton({
+	height: '8%',
+    width:'23%',
+    title: 'Reset',
+  	top: '33%',
+  	left: '75%'
+});
+//resetBtn.addEventListener('click', createCountdown);
+resetBtn.addEventListener('click', function(e) {
+	min.text = '{i}:';
+	sec.text = '{s}';
+	cd.reset();
+});
+win.add(resetBtn);
+// Timer Stuff Ends Here
 
 // Enabling presence allows you to know how many users are subscribed to each channel
 // and who they are
@@ -303,7 +395,7 @@ btPresenceEnable.addEventListener('click', function(e) {
 	//alert('Clicked Presence Enabled');
 	presenceEnable();
 });
-win.add(btPresenceEnable);
+//win.add(btPresenceEnable);
 
 var btPresenceDisable = Ti.UI.createButton({
 	title: 'Prsnce Disable',
@@ -316,7 +408,7 @@ btPresenceDisable.addEventListener('click', function(e) {
 	//alert('Clicked Presence Disabled');
 	presenceDisable();
 });
-win.add(btPresenceDisable);
+//win.add(btPresenceDisable);
 
 
 var btSend = Titanium.UI.createButton({
