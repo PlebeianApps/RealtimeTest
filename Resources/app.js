@@ -82,14 +82,14 @@ function presenceDisable()
 
 var unsubscribe = function()
 {
-	setTimeout(function(){ortc.send(taChannel.value, '----User Unsubscribed to Channel')}, 500);
+	setTimeout(function(){ortc.send(taChannel.value, '----A Meditator left the meditation hall')}, 500);
 	setTimeout(function(){ortc.unsubscribe(taChannel.value)}, 1500);
 }
 
 function subscribe()
 {
 	ortc.subscribe(taChannel.value, true);
-	ortc.send(taChannel.value, '----User Subscribed to Channel');
+	ortc.send(taChannel.value, '----A Meditator entered the meditation hall');
 }
 
 ortc.addEventListener('onException', function(e) {	
@@ -134,13 +134,13 @@ ortc.addEventListener('onPresence', function(e) {
 		Ti.API.info('numUsers: ' + numUsers);
 		Ti.API.info('currentNumber: ' + currentNumber);
 		addRowToEvents('(Channel: '+e.channel+') Presence: '+e.result);
-		if (currentNumber != numUsers)
-		{
-			currentNumber = numUsers;
-			Ti.API.info('Got in here');
-			var numString = numUsers + ' Users Subscribed';
-			ortc.send(taChannel.value, numString);
-		}
+		//if (currentNumber != numUsers)
+		//{
+		//	currentNumber = numUsers;
+		//	Ti.API.info('Got in here');
+		//	var numString = numUsers + ' Users Subscribed';
+		//	ortc.send(taChannel.value, numString);
+		//}
 	}
 });
 
@@ -328,7 +328,8 @@ cd = new countdown({
 	label_min: min,//minutes
 	label_sec: sec,//seconds
 	//on end event callback
-	onend: unsubscribe,
+	//onend: unsubscribe,
+	onend: function(e) {ortc.send(taChannel.value, '----User Stopped Meditating');}
 });
 
 var startBtn = Ti.UI.createButton({
@@ -340,7 +341,8 @@ var startBtn = Ti.UI.createButton({
 });
 startBtn.addEventListener('click', function(e){
 	cd.start();
-	subscribe();
+	ortc.send(taChannel.value, '----User Started Meditating');
+	//subscribe();
 });
 win.add(startBtn);
 
@@ -353,7 +355,8 @@ var stopBtn = Ti.UI.createButton({
 });
 stopBtn.addEventListener('click', function(e) {
 	cd.stop();
-	unsubscribe();
+	ortc.send(taChannel.value, '----User Stopped Meditating');
+	//unsubscribe();
 });
 win.add(stopBtn);
 
@@ -370,7 +373,7 @@ resetBtn.addEventListener('click', function(e) {
 	sec.text = '{s}';
 	cd.reset();
 });
-win.add(resetBtn);
+//win.add(resetBtn);
 // Timer Stuff Ends Here
 
 // Enabling presence allows you to know how many users are subscribed to each channel
